@@ -31,7 +31,7 @@ To explore the farm:
 1. Clone this repository.
 2. Ensure all assets are in the same directory.
 3. Open `index.html` in your browser.
-4. Live Demo: `[YOUR_URL_HERE]`
+4. Live Demo: `[[YOUR_URL_HERE]](https://knowledge-farm.vercel.app/)`
 
 ---
 *Note: Trivia and Handbook content are currently in **Chinese**, focusing on the specific terminology and practices of Chinese agriculture.*
