@@ -1,32 +1,37 @@
 # 🌾 Knowledge Farm (知识农场)
 
-Welcome to **Knowledge Farm**, a cozy educational farming simulation game inspired by the aesthetic of *Animal Crossing*. Grow your knowledge while growing your crops!
+**Knowledge Farm** is a cozy, educational farming simulation game inspired by the aesthetic of *Animal Crossing*. It serves as an interactive introduction to **Classic Chinese Agronomy**, where players learn the science behind essential crops while building their farm empire.
 
-## 🎮 Game Features
+## 🌏 Project Vision: The Classic Crop Series
+This project is an ongoing exploration of China's rich agricultural heritage. While the current version features a deep dive into **Rice Cultivation**, the game is designed to be an expandable platform for various classic crops.
 
-- **Cozy Aesthetic**: A clean, minimalist UI with a hand-drawn style and a soothing day/night cycle.
-- **Knowledge-Driven Growth**: Answer trivia questions about agriculture and plants to help your crops thrive.
-- **Farm Economy**: Start with a free rice seed and build your fortune with **Bud-Coins (芽币)**. Sell harvested crops to reinvest in your farm!
-- **Survival Events**: Protect your fields from floods, droughts, and pests in real-time "Rescue Missions".
-- **Farm Handbook**: Unlock a complete Encyclopedia of crops and achievements as you harvest.
-- **Custom UI**: Features a bespoke, game-style modal system—no boring browser alerts here!
+- **Current Chapter**: 🌾 The Rice Harvest (Comprehensive trivia on varieties, geography, and processing).
+- **In Development**: 🍑 The Orchard Update (Featuring Peaches and other classic fruits).
+- **Future Goals**: Expanding to include traditional medicinal herbs, tea, and diverse vegetables.
+
+## 🎮 Key Features
+
+- **Agronomy-Driven Growth**: Unlike typical farming sims, your crops grow based on your knowledge. Answer trivia questions grounded in real Chinese agricultural science to progress.
+- **Bud-Coin (芽币) Economy**: A fully integrated game economy. Start with a free trial, then earn and reinvest "Bud-Coins" to sustain your farm.
+- **Dynamic Rescue Missions**: Protect your crops from real-world farming challenges like floods, droughts, and pests through time-sensitive mini-games.
+- **The Living Handbook**: A growing Encyclopedia (农场手记) that records every crop you've successfully mastered, complete with scientific and cultural background.
+- **Immersive Visuals**: Minimalist hand-drawn style, game-style custom modals, and a farm-first navigation flow.
 
 ## 🛠️ How to Play
 
-1. **Visit the Shop**: Get your first Rice seed for free from the Nook-inspired shop.
-2. **Cultivate**: Answer multiple-choice and single-answer questions to progress through growth stages: *Seeding*, *Growing*, and *Mature*.
-3. **Handle Disasters**: React quickly to environmental threats to keep your crops safe.
-4. **Harvest & Sell**: Once mature, harvest your crops to earn 250 Bud-Coins.
-5. **Collect**: Unlock all items in your **Handbook** to become a Master Farmer!
+1. **Visit the Field**: Start at your "Plot Under Development" to see the potential of your farm.
+2. **Shop for Seeds**: Visit the Nook-inspired Seed Shop to purchase your next challenge.
+3. **Learn & Grow**: Progress through stages (*Seeding*, *Growing*, *Mature*) by solving trivia in Chinese.
+4. **Harvest & Expand**: Sell your mature crops for 250 Bud-Coins and unlock new entries in your Handbook.
 
-## 🚀 Deployment
+## 🚀 Deployment & Tech
+Built with **Vanilla HTML5, CSS3, and JavaScript**. 
 
-This project is built using pure **HTML5, CSS3, and Vanilla JavaScript**.
-
-To view the live version:
+To explore the farm:
 1. Clone this repository.
-2. Open `index.html` in any modern web browser.
-3. Or, visit the live link: `[YOUR_VERCEL_OR_GITHUB_PAGES_URL_HERE]`
+2. Ensure all assets are in the same directory.
+3. Open `index.html` in your browser.
+4. Live Demo: `[YOUR_URL_HERE]`
 
-## 🎨 Credits & Style
-Inspired by the wholesome world of *Animal Crossing*. Special thanks to the "Bud-Coin" economy and the resilient rice crops of the Knowledge Farm universe.
+---
+*Note: Trivia and Handbook content are currently in **Chinese**, focusing on the specific terminology and practices of Chinese agriculture.*
