@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识农场</title>
+    <style>
+        :root {
+            --ac-bg-light: #f4fff4; 
+            --ac-bg-main: #e8f5e9; 
+            --ac-card: #ffffff; 
+            --ac-text: #5d4037; 
+            --ac-accent: #81c784; 
+            --ac-accent-dark: #66bb6a;
+            --ac-gold: #ffd54f;
+            --ac-alert: #ff8a65;
+            --event-color: transparent;
+        }
+
+        body { 
+            background-color: var(--ac-bg-main); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif; 
+            overflow: hidden; 
+            color: var(--ac-text);
+        }
+        
+        .phone-container { 
+            width: 375px; height: 667px; 
+            background: #fff; border: 12px solid #fff; border-radius: 50px; 
+            box-shadow: 0 25px 70px rgba(109,76,65,0.15); 
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+
+        /* 顶部状态栏 */
+        .top-info {
+            position: absolute; top: 20px; left: 0; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 25px;
+            box-sizing: border-box; z-index: 110;
+        }
+        .money-display, .book-btn {
+            background: rgba(255, 255, 255, 0.9); padding: 8px 15px;
+            border-radius: 20px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px;
+            pointer-events: auto; cursor: pointer;
+        }
+        .money-display { color: #f57f17; cursor: default; }
+        .book-btn { color: var(--ac-accent-dark); border: none; font-family: inherit; font-size: 14px; }
+
+        /* 农场手记（图鉴）界面 */
+        #handbook-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fffef2; z-index: 500; display: none;
+            flex-direction: column; padding: 60px 25px 30px; box-sizing: border-box;
+        }
+        .handbook-header { text-align: center; margin-bottom: 25px; position: relative; }
+        .handbook-header h2 { margin: 0; color: #8d6e63; }
+        #achievement-medal { font-size: 40px; margin-top: 10px; display: none; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.1)); }
+        .close-handbook { position: absolute; top: -10px; right: 0; background: #eee; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
+        
+        .collection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; overflow-y: auto; }
+        .collection-item {
+            background: #fff; border: 3px solid #f0edda; border-radius: 25px;
+            padding: 15px; text-align: center; transition: 0.2s;
+        }
+        .collection-item.locked { opacity: 0.5; filter: grayscale(1); }
+        .collection-item.unlocked { border-color: var(--ac-accent); cursor: pointer; }
+        .item-icon { font-size: 40px; margin-bottom: 5px; }
+        .item-name { font-weight: bold; font-size: 14px; }
+
+        /* 自定义弹窗 */
+        #custom-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #fff; width: 80%; padding: 25px;
+            border-radius: 35px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: scale(0.8); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #custom-modal.active { display: flex; }
+        #custom-modal.active .modal-content { transform: scale(1); }
+        .modal-btn { background: var(--ac-accent); color: white; border: none; padding: 10px 30px; border-radius: 20px; margin-top: 20px; font-weight: bold; cursor: pointer; }
+
+        /* 1. 封面 */
+        #game-cover { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: opacity 0.6s ease; 
+            background: linear-gradient(135deg, var(--ac-bg-light) 0%, #ffffff 100%);
+        }
+        .cover-badge-text { width: 140px; height: 140px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(129,199,132,0.2); margin-bottom: 40px; border: 4px solid var(--ac-accent); animation: breathe 3s infinite ease-in-out; }
+        .cover-badge-text span { font-size: 60px; font-weight: bold; color: var(--ac-accent-dark); }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .cover-title { font-size: 32px; font-weight: bold; color: var(--ac-accent-dark); margin-bottom: 50px; letter-spacing: 4px; }
+        .start-btn { background: var(--ac-accent); border: none; color: white; padding: 18px 65px; border-radius: 40px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(129,199,132,0.3); transition: 0.3s; }
+
+        /* 2. 农田展示 */
+        #farm-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 95; display: none; flex-direction: column; align-items: center; background: linear-gradient(to bottom, #dcedfe, #ffffff); padding: 60px 20px; box-sizing: border-box; }
+        .empty-plot { width: 240px; height: 160px; background: #3e2723; border: 12px solid #a1887f; border-radius: 50%; box-shadow: inset 0 10px 20px rgba(0,0,0,0.4), 0 10px 0 #8d6e63; margin: 40px 0; }
+        .preview-text { text-align: center; }
+        .preview-text h2 { color: var(--ac-accent-dark); font-size: 28px; margin-bottom: 15px; }
+        .preview-text p { font-size: 16px; color: #5d4037; font-weight: bold; }
+        .shop-entry-btn { background: var(--ac-accent); border: none; color: white; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 40px; box-shadow: 0 6px 0 var(--ac-accent-dark); }
+
+        /* 3. 种子商店 */
+        #seed-shop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 90; display: none; flex-direction: column; align-items: center; background: #fffef2; padding: 60px 20px 40px; box-sizing: border-box; }
+        .shop-header { text-align: center; margin-bottom: 30px; }
+        .seed-list { width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .seed-item { background: #fff; border: 3px solid #f0edda; border-radius: 25px; padding: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .seed-item.locked { opacity: 0.6; cursor: not-allowed; background: #f5f5f5; }
+        .seed-item:not(.locked):hover { border-color: var(--ac-accent); transform: scale(1.02); }
+        .seed-icon { width: 50px; height: 50px; background: #e8f5e9; border-radius: 15px; margin-right: 15px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .seed-info { flex: 1; }
+        .seed-info h4 { margin: 0; font-size: 16px; color: #5d4037; }
+        .seed-price { font-weight: bold; color: #66bb6a; font-size: 14px; }
+
+        /* 4. 游戏主界面 */
+        #game-main { display: none; flex-direction: column; height: 100%; width: 100%; opacity: 0; transition: opacity 0.5s; }
+        #timer-ui { height: 6px; background: #eee; width: 100%; display: none; }
+        #timer-bar { height: 100%; background: var(--ac-alert); width: 100%; }
+        .growth-bar-wrapper { width: 100%; height: 8px; background: #eee; position: relative; z-index: 10; }
+        #growth-fill { width: 0%; height: 100%; background: var(--ac-accent); transition: width 0.8s ease; }
+        .stage-area { flex: 1.3; position: relative; background: linear-gradient(to bottom, #dcedfe, #ffffff); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        #crop-image { width: 220px; z-index: 2; opacity: 0; transform: scale(0.5); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s; }
+        #crop-image.loaded { opacity: 1; transform: scale(1); }
+        .event-mask { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; transition: 0.5s; background: var(--event-color); }
+
+        .quiz-card { flex: 1; position: relative; z-index: 5; background-color: var(--ac-card); margin: 0 15px 25px; padding: 35px 20px 20px; border-radius: 40px; box-shadow: 0 15px 40px rgba(109,76,65,0.08); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.03); }
+        #status-tag { position: absolute; top: -15px; right: 30px; background: var(--ac-accent); color: white; padding: 7px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        #q-text { font-size: 18px; color: var(--ac-text); margin: 10px 0 25px; font-weight: bold; text-align: center; line-height: 1.5; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn { background: #fff; border: 2px solid #f0f0f0; color: var(--ac-text); padding: 16px 10px; border-radius: 20px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s ease; }
+        .correct { background: var(--ac-accent) !important; color: white !important; border-color: var(--ac-accent) !important; }
+        .wrong { background: var(--ac-alert) !important; color: white !important; border-color: var(--ac-alert) !important; }
+        .grow-boost { animation: bounce 0.5s ease; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .fail-shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+        #explanation { font-size: 13px; color: #8d6e63; margin-top: 18px; background: #fafafa; padding: 15px; border-radius: 18px; display: none; border: 1px solid #f0f0f0; }
+        .sell-btn { background: var(--ac-gold) !important; color: #5d4037 !important; border: none !important; padding: 20px !important; font-size: 18px !important; grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="top-info">
+        <div class="money-display">💰 <span id="money-count">0</span></div>
+        <button class="book-btn" onclick="openHandbook()">📖 农场手记</button>
+    </div>
+
+    <div id="custom-modal">
+        <div class="modal-content"><div id="modal-body"></div><button class="modal-btn" onclick="closeModal()">我知道了</button></div>
+    </div>
+
+    <div id="handbook-overlay">
+        <div class="handbook-header">
+            <button class="close-handbook" onclick="closeHandbook()">✕</button>
+            <h2>农场手记</h2>
+            <div id="achievement-medal">🏆</div>
+        </div>
+        <div class="collection-grid" id="collection-list">
+            </div>
+    </div>
+
+    <div id="game-cover">
+        <div class="cover-badge-text"><span>米</span></div>
+        <div class="cover-title">知识农场</div>
+        <button class="start-btn" onclick="showPreview()">开始经营</button>
+    </div>
+
+    <div id="farm-preview">
+        <div class="empty-plot"></div>
+        <div class="preview-text">
+            <h2>待开发农田</h2>
+            <p id="preview-guide">欢迎来到知识农场！<br>土地已翻好，快去商店看看吧！</p>
+        </div>
+        <button class="shop-entry-btn" onclick="goToShop()">种子商店</button>
+    </div>
+
+    <div id="seed-shop">
+        <div class="shop-header"><h2>米博士种子店</h2><p id="shop-welcome">新手首单免费！</p></div>
+        <div class="seed-list" id="seed-items-container"></div>
+    </div>
+
+    <div id="game-main">
+        <div id="timer-ui"><div id="timer-bar"></div></div>
+        <div class="growth-bar-wrapper"><div id="growth-fill"></div></div>
+        <div class="stage-area">
+            <div id="event-mask" class="event-mask"></div>
+            <img id="crop-image" src="seed.png">
+        </div>
+        <div id="quiz-card" class="quiz-card">
+            <div id="status-tag">待启动</div>
+            <div id="q-text"></div>
+            <div id="q-options" class="options-grid"></div>
+            <div id="explanation"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 图鉴数据与玩家状态
+    const collectionData = {
+        "水稻": { icon: "🌾", unlocked: false, info: "水稻是全球最重要的粮食作物之一。人类常吃的稻种是Oryza sativa L.。它的生长经历了育种、分蘖、孕穗到成熟等阶段。" },
+        "桃子": { icon: "🍑", unlocked: false, info: "桃子属于蔷薇科植物，富含多种维生素。目前知识农场的桃子园正在建设中，敬请期待！" }
+    };
+
+    let userMoney = 0; let isFirstOrder = true; let currentCrop = "";
+    let currentStageIdx = 0; let currentQIdx = 0; let timeLeft = 7; let timerInterval = null; let selectedMulti = []; let isProcessing = false;
+
+    // 2. 通用 UI 逻辑
+    function showModal(text) { document.getElementById('modal-body').innerHTML = text; document.getElementById('custom-modal').classList.add('active'); }
+    function closeModal() { document.getElementById('custom-modal').classList.remove('active'); }
+
+    // 3. 手记（图鉴）逻辑
+    function openHandbook() {
+        const list = document.getElementById('collection-list');
+        list.innerHTML = "";
+        let allUnlocked = true;
+
+        for (let name in collectionData) {
+            const item = collectionData[name];
+            const div = document.createElement('div');
+            div.className = `collection-item ${item.unlocked ? 'unlocked' : 'locked'}`;
+            div.innerHTML = `<div class="item-icon">${item.unlocked ? item.icon : '❓'}</div><div class="item-name">${item.unlocked ? name : '未知作物'}</div>`;
+            
+            if (item.unlocked) {
+                div.onclick = () => showModal(`<h3>${name}回顾</h3><p style="font-size:14px; text-align:left;">${item.info}</p>`);
+            } else {
+                allUnlocked = false;
+            }
+            list.appendChild(div);
+        }
+
+        document.getElementById('achievement-medal').style.display = allUnlocked ? "block" : "none";
+        document.getElementById('handbook-overlay').style.display = 'flex';
+    }
+    function closeHandbook() { document.getElementById('handbook-overlay').style.display = 'none'; }
+
+    // 4. 经营逻辑
+    function showPreview() {
+        document.getElementById('game-cover').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('game-cover').style.display = 'none';
+            document.getElementById('farm-preview').style.display = 'flex';
+            if(!isFirstOrder) document.getElementById('preview-guide').innerHTML = "欢迎回来！<br>土地已整理，快采购新种子吧！";
+        }, 600);
+    }
+
+    function goToShop() { document.getElementById('farm-preview').style.display = 'none'; document.getElementById('seed-shop').style.display = 'flex'; renderShopItems(); }
+
+    function renderShopItems() {
+        const ricePrice = isFirstOrder ? 0 : 100;
+        document.getElementById('shop-welcome').innerText = isFirstOrder ? "首单免费特惠中！" : "祝你大丰收！";
+        const container = document.getElementById('seed-items-container');
+        container.innerHTML = `
+            <div class="seed-item" onclick="buySeed('水稻', ${ricePrice})">
+                <div class="seed-icon">🌱</div>
+                <div class="seed-info"><h4>水稻种子</h4><p>基础作物，生命力强。</p></div>
+                <div class="seed-price">${ricePrice} 芽币</div>
+            </div>
+            <div class="seed-item locked" onclick="showModal('桃子园正在扩建中，暂时无法购买哦！')">
+                <div class="seed-icon">🍑</div>
+                <div class="seed-info"><h4>桃子种子</h4><p>高价值果实。</p></div>
+                <div class="seed-price">500 芽币</div>
+            </div>
+        `;
+    }
+
+    function buySeed(name, price) {
+        if (userMoney < price) { showModal('芽币不足！快去收割换币。'); return; }
+        userMoney -= price; currentCrop = name; updateMoneyUI();
+        showModal(`获得了【${name}种子】，开始耕种！`);
+        document.getElementById('seed-shop').style.display = 'none'; startGame();
+    }
+
+    function startGame() {
+        const main = document.getElementById('game-main'); main.style.display = 'flex';
+        setTimeout(() => main.style.opacity = '1', 50);
+        currentStageIdx = 0; currentQIdx = 0;
+        document.getElementById('growth-fill').style.width = "0%";
+        document.getElementById('crop-image').classList.add('loaded');
+        renderQuestion();
+    }
+
+    // 5. 答题与收割逻辑 (百科数据保留自)
+    const gameData = [
+        { stageName: "🌱 育种期", img: "seed.png", questions: [ { type: "single", q: "哪一项不是人类常吃的稻？", opts: ["籼稻", "粳稻", "陆稻", "澳洲稻"], ans: "澳洲稻", info: "澳洲稻是不同物种。" }, { type: "single", q: "哪一种不是稻的籽粒脱壳后的产物？", opts: ["大米", "小米", "糯米", "粳米"], ans: "小米", info: "小米是谷子产物。" } ] },
+        { stageName: "🌿 生长期", img: "seedling.png", questions: [ { type: "multi", q: "哪些是天然大米会有的颜色？(多选)", opts: ["白色", "金色", "黑色", "红色"], ans: ["白色", "金色", "黑色", "红色"], isMulti: true }, { isEvent: true }, { type: "single", q: "哪个地区不是稻的主产区？", opts: ["东北", "华南", "西南", "青藏"], ans: "青藏", info: "解析见手记。" } ] },
+        { stageName: "🌾 成熟期", img: "mature.png", questions: [ { type: "single", q: "大米可以做成哪些食物？", opts: ["米皮", "米粉", "米线", "米仁"], ans: "米仁", info: "解析见手记。" } ] }
+    ];
+
+    const events = [
+        { name: "洪涝", q: "🚨 突发洪水！<br>最关键救灾措施是？", opts: ["加固田埂", "立即排水", "喷洒肥料", "增加光照"], ans: "立即排水", color: "rgba(121, 134, 203, 0.6)" },
+        { name: "旱灾", q: "☀️ 持续高温！<br>应采取什么应急措施？", opts: ["覆盖遮阳", "喷洒农药", "引水灌溉", "立即收割"], ans: "引水灌溉", color: "rgba(255, 152, 0, 0.4)" },
+        { name: "虫害", q: "🐛 发现大量稻飞虱！<br>应优先采取哪种手段？", opts: ["生物防治", "焚烧秸秆", "排干水分", "增加间距"], ans: "生物防治", color: "rgba(76, 175, 80, 0.4)" }
+    ];
+
+    function updateMoneyUI() { document.getElementById('money-count').innerText = userMoney; }
+
+    function renderQuestion() {
+        isProcessing = false; const stage = gameData[currentStageIdx]; let qData = stage.questions[currentQIdx];
+        if (qData.isEvent && !qData.q) { qData = { ...events[Math.floor(Math.random() * events.length)], type: "event" }; stage.questions[currentQIdx] = qData; }
+        document.getElementById('explanation').style.display = 'none'; document.getElementById('status-tag').innerText = stage.stageName;
+        document.getElementById('q-text').innerHTML = qData.q; document.getElementById('crop-image').src = stage.img;
+        const optContainer = document.getElementById('q-options'); optContainer.innerHTML = ''; selectedMulti = [];
+        if (qData.type === 'event') { document.getElementById('timer-ui').style.display = 'block'; document.documentElement.style.setProperty('--event-color', qData.color); startEventTimer(); }
+        else { document.getElementById('timer-ui').style.display = 'none'; document.documentElement.style.setProperty('--event-color', 'transparent'); }
+        qData.opts.forEach(opt => { const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt; btn.onclick = () => handleChoice(opt, btn, qData); optContainer.appendChild(btn); });
+        if (qData.isMulti) { const confirmBtn = document.createElement('button'); confirmBtn.className = 'option-btn correct'; confirmBtn.style.gridColumn = "span 2"; confirmBtn.innerText = "确认选择"; confirmBtn.onclick = () => checkMulti(qData); optContainer.appendChild(confirmBtn); }
+    }
+
+    function handleChoice(opt, btn, qData) {
+        if (isProcessing) return;
+        if (qData.isMulti) { if (selectedMulti.includes(opt)) { selectedMulti = selectedMulti.filter(o => o !== opt); btn.classList.remove('correct'); } else { selectedMulti.push(opt); btn.classList.add('correct'); } }
+        else if (qData.type === 'event') { isProcessing = true; if (opt === qData.ans) onEventResult(true, btn, "✅ 拯救成功！"); else onEventResult(false, btn, "❌ 拯救失败，退回重新开始！"); }
+        else { if (opt === qData.ans) onCorrect(btn, qData); else { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 500); } }
+    }
+
+    function checkMulti(qData) { if (qData.ans.length === selectedMulti.length && qData.ans.every(v => selectedMulti.includes(v))) onCorrect(null, qData); else { showModal('选错了或不完整！'); renderQuestion(); } }
+    function onEventResult(isSuccess, btn, msg) { clearInterval(timerInterval); const expBox = document.getElementById('explanation'); expBox.innerHTML = `<strong>${msg}</strong>`; expBox.style.display = 'block'; if (isSuccess) { if(btn) btn.classList.add('correct'); currentQIdx++; updateProgressBar(); setTimeout(renderQuestion, 2000); } else { if(btn) btn.classList.add('wrong'); document.getElementById('quiz-card').classList.add('fail-shake'); setTimeout(() => { document.getElementById('quiz-card').classList.remove('fail-shake'); currentQIdx = 0; updateProgressBar(); renderQuestion(); }, 2000); } }
+    function onCorrect(btn, qData) { if (btn) btn.classList.add('correct'); triggerGrowEffect(); if (qData.info) { const expBox = document.getElementById('explanation'); expBox.innerText = "✨ " + qData.info; expBox.style.display = 'block'; } currentQIdx++; updateProgressBar(); setTimeout(() => { if (currentQIdx >= gameData[currentStageIdx].questions.length) nextStage(); else renderQuestion(); }, qData.info ? 1800 : 800); }
+    function triggerGrowEffect() { const img = document.getElementById('crop-image'); img.classList.remove('grow-boost'); void img.offsetWidth; img.classList.add('grow-boost'); }
+    function updateProgressBar() { const totalStages = gameData.length; const progress = ((currentStageIdx / totalStages) + (currentQIdx / gameData[currentStageIdx].questions.length / totalStages)) * 100; document.getElementById('growth-fill').style.width = Math.min(progress, 100) + "%"; }
+    function nextStage() { currentStageIdx++; currentQIdx = 0; if (currentStageIdx < gameData.length) renderQuestion(); else showHarvestScreen(); }
+    
+    function showHarvestScreen() {
+        document.getElementById('status-tag').innerText = "🎊 已成熟";
+        document.getElementById('q-text').innerText = `${currentCrop}已丰收！快收割卖给米博士吧！`;
+        const optContainer = document.getElementById('q-options');
+        optContainer.innerHTML = '<button class="option-btn sell-btn" onclick="harvest()">收割并卖出 (+250 芽币)</button>';
+        document.getElementById('growth-fill').style.width = "100%";
+    }
+    
+    function harvest() {
+        userMoney += 250; isFirstOrder = false;
+        // 解锁图鉴
+        if (collectionData[currentCrop]) collectionData[currentCrop].unlocked = true;
+        
+        updateMoneyUI();
+        showModal(`收割成功！获得了 250 芽币。<br>【${currentCrop}】已记录在农场手记中！`);
+        document.getElementById('crop-image').classList.remove('loaded');
+        setTimeout(() => { document.getElementById('game-main').style.display = 'none'; document.getElementById('farm-preview').style.display = 'flex'; }, 500);
+    }
+
+    function startEventTimer() { timeLeft = 7; const bar = document.getElementById('timer-bar'); bar.style.transition = "none"; bar.style.width = "100%"; setTimeout(() => { bar.style.transition = "width 7s linear"; bar.style.width = "0%"; }, 50); timerInterval = setInterval(() => { timeLeft--; if (timeLeft <= 0) { clearInterval(timerInterval); showModal('⏰ 救援失败！'); onEventResult(false, null, "灾难来袭..."); } }, 1000); }
+</script>
+</body>
+</html>
