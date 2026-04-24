@@ -537,6 +537,10 @@ const gameData = [
     function updateMoneyUI() { document.getElementById('money-count').innerText = userMoney; }
 
     function renderQuestion() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
         document.getElementById('timer-ui').style.display = 'none'; 
         document.getElementById('explanation').style.display = 'none';
         isProcessing = false; const stage = gameData[currentStageIdx]; let qData = stage.questions[currentQIdx];
@@ -602,42 +606,49 @@ const gameData = [
     }
 
     function onEventResult(isSuccess, btn, msg) { 
-        // 1. 立刻停止计时器，防止它再次触发
-        clearInterval(timerInterval); 
+        // 1. 【核心修复】立刻停止并销毁计时器，彻底杜绝无限弹窗
+        if (timerInterval) {
+            clearInterval(timerInterval); 
+            timerInterval = null; 
+        }
         
+        // 2. 停止顶部的红色进度条动画
+        const bar = document.getElementById('timer-bar');
+        if(bar) bar.style.animation = 'none';
+
         const expBox = document.getElementById('explanation'); 
         expBox.innerHTML = `<strong>${msg}</strong>`; 
         expBox.style.display = 'block'; 
         
         if (isSuccess) { 
-            // 成功逻辑保持不变...
+            // --- 成功逻辑 ---
             if(btn) btn.classList.add('correct'); 
             comboCount++; 
             if (comboCount >= 3) showComboEffect(comboCount);
             currentQIdx++; 
             updateProgressBar(); 
+            // 2秒后进入下一题
             setTimeout(renderQuestion, 2000); 
         } else { 
-            // --- 核心修复：失败处理 ---
+            // --- 失败处理 (解决无限循环的关键) ---
             if(btn) btn.classList.add('wrong'); 
             wrongCount++; 
-            comboCount = 0; 
+            comboCount = 0; // 连击中断
 
-            // 增加防抖处理：添加一个标志位防止重复弹窗（可选）
-            // 确保进度条动画停止
-            const bar = document.getElementById('timer-bar');
-            if(bar) bar.style.animation = 'none';
-
+            // 按钮和卡片视觉反馈
             document.getElementById('quiz-card').classList.add('fail-shake'); 
             
             setTimeout(() => { 
                 document.getElementById('quiz-card').classList.remove('fail-shake'); 
                 
-                // 关键点：回到本阶段的第一题
+                // 确保任何残留的“救援失败”弹窗被关闭
+                closeModal();
+                
+                // 惩罚机制：回到本生长阶段的第一题
                 currentQIdx = 0; 
                 updateProgressBar(); 
                 
-                // 重新渲染题目，这会自动切换回普通题界面并隐藏倒计时 UI
+                // 重新渲染题目（会自动隐藏倒计时UI，切回普通模式）
                 renderQuestion(); 
             }, 2000); 
         } 
