@@ -122,29 +122,27 @@
         #game-main { display: none; flex-direction: column; height: 100%; width: 100%; opacity: 0; transition: opacity 0.5s; }
 
         #timer-ui { 
-            height: 8px; /* 稍微加粗一点点，更有视觉压力 */
+            height: 8px;
             background: #f5f5f5; 
             width: 100%; 
             display: none; 
-            overflow: hidden; /* 确保内部条不会溢出圆角 */
+            overflow: hidden;
         }
 
         #timer-bar { 
             height: 100%; 
-            background: var(--ac-alert); /* 确保这个变量是红色 #ff5252 */
+            background: var(--ac-alert);
             width: 100%; 
-            /* 关键：设置变换基点在左侧，这样缩放时是从右往左缩 */
             transform-origin: left; 
             transform: scaleX(1); 
         }
 
-        /* 核心：定义倒计时的动画帧 */
+        /* 定义倒计时的动画帧 */
         @keyframes timer {
             from { transform: scaleX(1); }
             to { transform: scaleX(0); }
         }
 
-        /* 其他保持不变，但建议检查这个 */
         .event-mask { 
             position: absolute; 
             top: 0; 
@@ -184,7 +182,7 @@
             border: 1px solid rgba(129, 199, 132, 0.3);
             border-radius: 15px;
             padding: 12px 20px;
-            margin: 0 40px 30px; /* 左右留白增加，下方留出间距给按钮 */
+            margin: 0 40px 30px;
             text-align: left;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
@@ -215,19 +213,19 @@
         /* Combo 动画文字样式 */
         .combo-text {
             position: absolute;
-            top: -45px; /* 放在屏幕中上方，比较显眼 */
+            top: -45px;
             left: 50%;
             transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             gap: 10px;
             
-            /* 动森风格：奶油底色 + 圆润边框 */
+            
             background: rgba(255, 252, 232, 0.95); 
             padding: 8px 15px;
-            border-radius: 50px; /* 胶囊形状 */
-            border: 3px solid #ffe082; /* 浅黄色边线 */
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1); /* 淡淡的投影 */
+            border-radius: 50px;
+            border: 3px solid #ffe082;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
             
             z-index: 1000;
             pointer-events: none;
@@ -241,7 +239,6 @@
             font-weight: bold;
         }
 
-        /* 连对数字：放在一个彩色小圆圈里 */
         .combo-number {
             background: #ffb74d; /* 橘黄色圆圈 */
             color: white;
@@ -264,13 +261,10 @@
             100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
         }
 
-
-
-
         .side-survey-btn {
             position: absolute;
             right: 20px;
-            top: 20px; /* 调整了高度，确保在手机框内显示合适 */
+            top: 20px;
             background: rgba(255, 255, 255, 0.9);
             padding: 6px 15px;
             border-radius: 20px;
@@ -350,7 +344,7 @@
 </div>
 
 <script>
-    // 1. 图鉴数据与玩家状态
+    // 图鉴数据与玩家状态
     const collectionData = {
         "水稻": { icon: "🌾", unlocked: false, info: "水稻是全球最重要的粮食作物之一。人类常吃的稻种是Oryza sativa L.。它的生长经历了育种、分蘖、孕穗到成熟等阶段。" },
         "桃子": { icon: "🍑", unlocked: false, info: "桃子属于蔷薇科植物，富含多种维生素。目前知识农场的桃子园正在建设中，敬请期待！" }
@@ -359,16 +353,14 @@
     let userMoney = 0; let isFirstOrder = true; let currentCrop = ""; let wrongCount = 0; let comboCount = 0;
     let currentStageIdx = 0; let currentQIdx = 0; let timeLeft = 7; let timerInterval = null; let selectedMulti = []; let isProcessing = false;
 
-    // 2. 通用 UI 逻辑
     function showModal(text) { document.getElementById('modal-body').innerHTML = text; document.getElementById('custom-modal').classList.add('active'); }
     function closeModal() { 
         document.getElementById('custom-modal').classList.remove('active'); 
-        // 关闭时恢复原生按钮的显示，以免其他弹窗也没按钮
         const originalBtn = document.querySelector('.modal-btn');
         if(originalBtn) originalBtn.style.display = 'inline-block';
     }
     
-    // 3. 手记（图鉴）逻辑
+    // 手记（图鉴）
     function openHandbook() {
         const list = document.getElementById('collection-list');
         list.innerHTML = "";
@@ -393,7 +385,7 @@
     }
     function closeHandbook() { document.getElementById('handbook-overlay').style.display = 'none'; }
 
-    // 4. 经营逻辑
+    // 经营逻辑
     function showPreview() {
         document.getElementById('game-cover').style.opacity = '0';
         setTimeout(() => {
@@ -433,7 +425,6 @@
         currentCrop = name; 
         updateMoneyUI();
 
-        // --- 核心修改：先隐藏掉弹窗底部的默认按钮 ---
         const originalBtn = document.querySelector('.modal-btn');
         if(originalBtn) originalBtn.style.display = 'none';
 
@@ -469,7 +460,7 @@
         renderQuestion();
     }
 
-    // 5. 答题与收割逻辑 (严格对照表格补全解析)
+    // 答题与收割逻辑
 const gameData = [
         { 
             stageName: "🌱 育种期", 
@@ -558,7 +549,7 @@ const gameData = [
         if (isProcessing) return;
         
         if (qData.isMulti) { 
-            // 多选题逻辑（保持不变）
+            // 多选题
             if (selectedMulti.includes(opt)) { 
                 selectedMulti = selectedMulti.filter(o => o !== opt); 
                 btn.classList.remove('correct'); 
@@ -572,7 +563,6 @@ const gameData = [
             if (opt === qData.ans) {
                 onEventResult(true, btn, "✅ 拯救成功！");
             } else { 
-                // --- 修改 1: 灾害事件选错时，也要增加错误计数 ---
                 wrongCount++; 
                 onEventResult(false, btn, "❌ 拯救失败，退回重新开始！");
             } 
@@ -582,7 +572,7 @@ const gameData = [
                 onCorrect(btn, qData);
             } else { 
                 wrongCount++; 
-                comboCount = 0; // <--- 关键：选错单选题，连击中断
+                comboCount = 0;
                 
                 btn.classList.add('wrong'); 
                 setTimeout(() => btn.classList.remove('wrong'), 500); 
@@ -592,13 +582,11 @@ const gameData = [
 
     function checkMulti(qData) { 
         if (qData.ans.length === selectedMulti.length && qData.ans.every(v => selectedMulti.includes(v))) {
-            // 答对后立刻清空选择，防止干扰下一题
             selectedMulti = []; 
             onCorrect(null, qData);
         } else { 
             wrongCount++; 
             comboCount = 0; 
-            // 答错也要清空，让玩家重新选
             selectedMulti = []; 
             showModal('选错了或不完整！'); 
             renderQuestion(); 
@@ -606,13 +594,11 @@ const gameData = [
     }
 
     function onEventResult(isSuccess, btn, msg) { 
-        // 1. 【核心修复】立刻停止并销毁计时器，彻底杜绝无限弹窗
         if (timerInterval) {
             clearInterval(timerInterval); 
             timerInterval = null; 
         }
         
-        // 2. 停止顶部的红色进度条动画
         const bar = document.getElementById('timer-bar');
         if(bar) bar.style.animation = 'none';
 
@@ -621,7 +607,6 @@ const gameData = [
         expBox.style.display = 'block'; 
         
         if (isSuccess) { 
-            // --- 成功逻辑 ---
             if(btn) btn.classList.add('correct'); 
             comboCount++; 
             if (comboCount >= 3) showComboEffect(comboCount);
@@ -630,53 +615,43 @@ const gameData = [
             // 2秒后进入下一题
             setTimeout(renderQuestion, 2000); 
         } else { 
-            // --- 失败处理 (解决无限循环的关键) ---
             if(btn) btn.classList.add('wrong'); 
             wrongCount++; 
-            comboCount = 0; // 连击中断
+            comboCount = 0;
 
-            // 按钮和卡片视觉反馈
             document.getElementById('quiz-card').classList.add('fail-shake'); 
             
             setTimeout(() => { 
                 document.getElementById('quiz-card').classList.remove('fail-shake'); 
                 
-                // 确保任何残留的“救援失败”弹窗被关闭
                 closeModal();
                 
-                // 惩罚机制：回到本生长阶段的第一题
                 currentQIdx = 0; 
                 updateProgressBar(); 
                 
-                // 重新渲染题目（会自动隐藏倒计时UI，切回普通模式）
                 renderQuestion(); 
             }, 2000); 
         } 
     }
 
     function onCorrect(btn, qData) {
-        // 1. 连击计数立刻增加
         comboCount++; 
         if (comboCount >= 3) {
             showComboEffect(comboCount);
         }
 
-        // 2. 视觉反馈
         if (btn) btn.classList.add('correct');
         triggerGrowEffect();
         
-        // 3. 显示解析
         if (qData.info) {
             const expBox = document.getElementById('explanation');
             expBox.innerText = "✨ " + qData.info;
             expBox.style.display = 'block';
         }
 
-        // 4. 进度更新
         currentQIdx++;
         updateProgressBar();
 
-        // 5. 切换下一题
         setTimeout(() => {
             if (currentQIdx >= gameData[currentStageIdx].questions.length) nextStage();
             else renderQuestion();
@@ -701,7 +676,6 @@ const gameData = [
         let icon = "";
         let evaluation = "";
 
-        // 1. 判定品质与称号
         if (wrongCount === 0) {
             quality = "✨ 特级大米";
             bonus = 400;
@@ -721,7 +695,6 @@ const gameData = [
 
         userMoney += bonus;
 
-        // 2. 米博士👩‍🔬的随机补贴逻辑 (1-100)
         let luckyMsg = "";
         let luckyBonus = 0;
         if (Math.random() < 0.3) {
@@ -735,16 +708,15 @@ const gameData = [
             `;
         }
 
-        // 3. 更新游戏状态
+        // 更新游戏状态
         isFirstOrder = false;
         if (collectionData[currentCrop]) collectionData[currentCrop].unlocked = true;
         updateMoneyUI();
 
-        // 4. 隐藏底部默认按钮，准备显示自定义分享卡片
         const originalBtn = document.querySelector('.modal-btn');
         if (originalBtn) originalBtn.style.display = 'none';
 
-        // 5. 弹出精美的分享成就卡
+        // 分享成就卡
         showModal(`
             <div id="share-card" style="padding: 10px; text-align: center;">
                 <p style="color: #a1887f; font-size: 12px; margin-bottom: 10px; letter-spacing: 2px;">KNOWLEDGE FARM HONOR</p>
@@ -777,7 +749,6 @@ const gameData = [
             </div>
         `);
 
-        // 重置题目进度
         currentQIdx = 0;
     }
 
@@ -788,16 +759,14 @@ const gameData = [
     }, 500);
     
 
-    // 显示动森风格的“连胜”效果
-    // 显示动森风格的“连胜”效果 (超神版)
+    // “连胜”效果
     function showComboEffect(count) {
         const container = document.getElementById('quiz-card') || document.querySelector('.phone-container');
         if (!container) return;
 
         const comboEl = document.createElement('div');
         comboEl.className = 'combo-text';
-        
-        // 组合成： [连对] (数字) 的样式
+    
         comboEl.innerHTML = `
             <span class="combo-label">连对</span>
             <div class="combo-number">${count}</div>
@@ -814,11 +783,9 @@ const gameData = [
             timeLeft = 7; 
             const bar = document.getElementById('timer-bar'); 
             
-            // --- 核心修复：重置进度条动画 ---
-            bar.style.animation = 'none'; // 先关闭动画
-            bar.offsetHeight; // 触发回流（强制浏览器重绘）
-            bar.style.animation = 'timer 7s linear forwards'; // 重新开启 7 秒倒计时动画
-            // -------------------------------
+            bar.style.animation = 'none';
+            bar.offsetHeight;
+            bar.style.animation = 'timer 7s linear forwards';
 
             timerInterval = setInterval(() => { 
                 timeLeft--; 
@@ -833,22 +800,18 @@ const gameData = [
     }
 
     function safeOpen() {
-        // 这是 https://v.wjx.cn/vm/QsWmQ71.aspx 的安全编码
+        // https://v.wjx.cn/vm/QsWmQ71.aspx 的安全编码
         const b64 = "aHR0cHM6Ly92LndqeC5jbi92bS9Rc1dtUTcxLmFzcHg=";
         try {
             const url = atob(b64);
             console.log("正在尝试打开链接:", url);
             
-            // 尝试打开新窗口
             const win = window.open(url, '_blank');
-            
-            // 如果被浏览器拦截（win 为空），则在当前窗口直接跳转
             if (!win || win.closed || typeof win.closed === 'undefined') {
                 console.warn("检测到弹出窗口被拦截，正在当前页面跳转...");
                 window.location.href = url;
             }
         } catch (e) {
-            // 如果以上都失败，最后的保底强制跳转
             window.location.href = "https://v.wjx.cn/vm/QsWmQ71.aspx";
         }
     }
