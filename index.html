@@ -120,8 +120,43 @@
 
         /* 4. 游戏主界面 */
         #game-main { display: none; flex-direction: column; height: 100%; width: 100%; opacity: 0; transition: opacity 0.5s; }
-        #timer-ui { height: 6px; background: #eee; width: 100%; display: none; }
-        #timer-bar { height: 100%; background: var(--ac-alert); width: 100%; }
+
+        #timer-ui { 
+            height: 8px; /* 稍微加粗一点点，更有视觉压力 */
+            background: #f5f5f5; 
+            width: 100%; 
+            display: none; 
+            overflow: hidden; /* 确保内部条不会溢出圆角 */
+        }
+
+        #timer-bar { 
+            height: 100%; 
+            background: var(--ac-alert); /* 确保这个变量是红色 #ff5252 */
+            width: 100%; 
+            /* 关键：设置变换基点在左侧，这样缩放时是从右往左缩 */
+            transform-origin: left; 
+            transform: scaleX(1); 
+        }
+
+        /* 核心：定义倒计时的动画帧 */
+        @keyframes timer {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        /* 其他保持不变，但建议检查这个 */
+        .event-mask { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 3; 
+            pointer-events: none; 
+            transition: background 0.5s ease; /* 让屏幕变色更平滑 */
+            background: transparent; /* 默认透明 */
+        }
+
         .growth-bar-wrapper { width: 100%; height: 8px; background: #eee; position: relative; z-index: 10; }
         #growth-fill { width: 0%; height: 100%; background: var(--ac-accent); transition: width 0.8s ease; }
         .stage-area { flex: 1.3; position: relative; background: linear-gradient(to bottom, #dcedfe, #ffffff); display: flex; justify-content: center; align-items: center; overflow: hidden; }
@@ -142,6 +177,111 @@
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
         #explanation { font-size: 13px; color: #8d6e63; margin-top: 18px; background: #fafafa; padding: 15px; border-radius: 18px; display: none; border: 1px solid #f0f0f0; }
         .sell-btn { background: var(--ac-gold) !important; color: #5d4037 !important; border: none !important; padding: 20px !important; font-size: 18px !important; grid-column: span 2; }
+
+
+        .test-notice {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(129, 199, 132, 0.3);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin: 0 40px 30px; /* 左右留白增加，下方留出间距给按钮 */
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .test-notice strong {
+            display: block;
+            color: #a1887f;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .test-notice p {
+            margin: 0;
+            font-size: 12px;
+            color: #8d6e63;
+            line-height: 1.6;
+        }
+
+        .survey-entrance {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #81c784;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Combo 动画文字样式 */
+        .combo-text {
+            position: absolute;
+            top: -45px; /* 放在屏幕中上方，比较显眼 */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            
+            /* 动森风格：奶油底色 + 圆润边框 */
+            background: rgba(255, 252, 232, 0.95); 
+            padding: 8px 15px;
+            border-radius: 50px; /* 胶囊形状 */
+            border: 3px solid #ffe082; /* 浅黄色边线 */
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1); /* 淡淡的投影 */
+            
+            z-index: 1000;
+            pointer-events: none;
+            animation: acPop 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 连对文字 */
+        .combo-label {
+            color: #8d6e63; /* 深木色 */
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* 连对数字：放在一个彩色小圆圈里 */
+        .combo-number {
+            background: #ffb74d; /* 橘黄色圆圈 */
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.1); /* 增加一点立体感 */
+        }
+
+        @keyframes acPop {
+            0% { opacity: 0; transform: translate(-50%, -20%) scale(0.5); }
+            15% { opacity: 1; transform: translate(-50%, -55%) scale(1.1); }
+            30% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
+        }
+
+
+
+
+        .side-survey-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px; /* 调整了高度，确保在手机框内显示合适 */
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #66bb6a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e8f5e9;
+            cursor: pointer;
+            z-index: 120;
+        }
     </style>
 </head>
 <body>
@@ -153,7 +293,7 @@
     </div>
 
     <div id="custom-modal">
-        <div class="modal-content"><div id="modal-body"></div><button class="modal-btn" onclick="closeModal()">我知道了</button></div>
+        <div class="modal-content"><div id="modal-body"></div><button class="modal-btn" onclick="closeModal()">返回农场</button></div>
     </div>
 
     <div id="handbook-overlay">
@@ -169,10 +309,17 @@
     <div id="game-cover">
         <div class="cover-badge-text"><span>米</span></div>
         <div class="cover-title">知识农场</div>
+
+        <div class="test-notice">
+                <strong>⚠️ 测试版本说明</strong>
+                <p>当前版本仍不稳定，随机事件由 AI 编写，可能存在逻辑错误，请谅解。</p>
+        </div>
+
         <button class="start-btn" onclick="showPreview()">开始经营</button>
     </div>
 
     <div id="farm-preview">
+        <div class="side-survey-btn" onclick="safeOpen()">📋 问卷</div>
         <div class="empty-plot"></div>
         <div class="preview-text">
             <h2>待开发农田</h2>
@@ -209,13 +356,18 @@
         "桃子": { icon: "🍑", unlocked: false, info: "桃子属于蔷薇科植物，富含多种维生素。目前知识农场的桃子园正在建设中，敬请期待！" }
     };
 
-    let userMoney = 0; let isFirstOrder = true; let currentCrop = "";
+    let userMoney = 0; let isFirstOrder = true; let currentCrop = ""; let wrongCount = 0; let comboCount = 0;
     let currentStageIdx = 0; let currentQIdx = 0; let timeLeft = 7; let timerInterval = null; let selectedMulti = []; let isProcessing = false;
 
     // 2. 通用 UI 逻辑
     function showModal(text) { document.getElementById('modal-body').innerHTML = text; document.getElementById('custom-modal').classList.add('active'); }
-    function closeModal() { document.getElementById('custom-modal').classList.remove('active'); }
-
+    function closeModal() { 
+        document.getElementById('custom-modal').classList.remove('active'); 
+        // 关闭时恢复原生按钮的显示，以免其他弹窗也没按钮
+        const originalBtn = document.querySelector('.modal-btn');
+        if(originalBtn) originalBtn.style.display = 'inline-block';
+    }
+    
     // 3. 手记（图鉴）逻辑
     function openHandbook() {
         const list = document.getElementById('collection-list');
@@ -272,37 +424,121 @@
     }
 
     function buySeed(name, price) {
-        if (userMoney < price) { showModal('芽币不足！快去收割换币。'); return; }
-        userMoney -= price; currentCrop = name; updateMoneyUI();
-        showModal(`获得了【${name}种子】，开始耕种！`);
-        document.getElementById('seed-shop').style.display = 'none'; startGame();
+        if (userMoney < price) { 
+            showModal('芽币不足！快去收割换币。'); 
+            return; 
+        }
+        
+        userMoney -= price; 
+        currentCrop = name; 
+        updateMoneyUI();
+
+        // --- 核心修改：先隐藏掉弹窗底部的默认按钮 ---
+        const originalBtn = document.querySelector('.modal-btn');
+        if(originalBtn) originalBtn.style.display = 'none';
+
+        showModal(`
+            <div style="padding: 10px; text-align: center;">
+                <p style="font-size: 20px; color: #8d6e63; margin-bottom: 25px; font-weight: 500;">
+                    获得了 <span style="color: #4caf50; font-weight: bold;">${name}种子</span>
+                </p>
+                <button onclick="closeModal()" style="
+                    background: #81c784; 
+                    color: white; 
+                    border: none; 
+                    padding: 14px 40px; 
+                    border-radius: 30px; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(129,199,132,0.4);
+                ">开始耕种</button>
+            </div>
+        `);
+
+        document.getElementById('seed-shop').style.display = 'none'; 
+        startGame();
     }
 
     function startGame() {
         const main = document.getElementById('game-main'); main.style.display = 'flex';
         setTimeout(() => main.style.opacity = '1', 50);
-        currentStageIdx = 0; currentQIdx = 0;
+        currentStageIdx = 0; currentQIdx = 0; wrongCount = 0; comboCount = 0;
         document.getElementById('growth-fill').style.width = "0%";
         document.getElementById('crop-image').classList.add('loaded');
         renderQuestion();
     }
 
-    // 5. 答题与收割逻辑 (百科数据保留自)
-    const gameData = [
-        { stageName: "🌱 育种期", img: "seed.png", questions: [ { type: "single", q: "哪一项不是人类常吃的稻？", opts: ["籼稻", "粳稻", "陆稻", "澳洲稻"], ans: "澳洲稻", info: "澳洲稻是不同物种。" }, { type: "single", q: "哪一种不是稻的籽粒脱壳后的产物？", opts: ["大米", "小米", "糯米", "粳米"], ans: "小米", info: "小米是谷子产物。" } ] },
-        { stageName: "🌿 生长期", img: "seedling.png", questions: [ { type: "multi", q: "哪些是天然大米会有的颜色？(多选)", opts: ["白色", "金色", "黑色", "红色"], ans: ["白色", "金色", "黑色", "红色"], isMulti: true }, { isEvent: true }, { type: "single", q: "哪个地区不是稻的主产区？", opts: ["东北", "华南", "西南", "青藏"], ans: "青藏", info: "解析见手记。" } ] },
-        { stageName: "🌾 成熟期", img: "mature.png", questions: [ { type: "single", q: "大米可以做成哪些食物？", opts: ["米皮", "米粉", "米线", "米仁"], ans: "米仁", info: "解析见手记。" } ] }
+    // 5. 答题与收割逻辑 (严格对照表格补全解析)
+const gameData = [
+        { 
+            stageName: "🌱 育种期", 
+            img: "seed.png", 
+            questions: [ 
+                { 
+                    type: "single", 
+                    q: "哪一项不是人类常吃的稻？", 
+                    opts: ["籼稻", "粳稻", "陆稻", "澳洲稻"], 
+                    ans: "澳洲稻", 
+                    info: "人类常吃的稻种是Oryza sativa L.，主要分为籼稻、粳稻和陆稻，澳洲稻并非主要食用稻种。" 
+                }, 
+                { 
+                    type: "single", 
+                    q: "哪一种不是稻的籽粒脱壳后的产物？", 
+                    opts: ["大米", "小米", "糯米", "粳米"], 
+                    ans: "小米", 
+                    info: "小米是谷子（也称为粟）脱壳后的产物。大米是水稻脱壳以后的产物，糯米是糯稻脱壳后的产物，粳米是粳稻脱壳后的产物，这三种稻都是同一个物种（学名Oryza sativa L.）的不同类型。" 
+                } 
+            ] 
+        },
+        { 
+            stageName: "🌿 生长期", 
+            img: "seedling.png", 
+            questions: [ 
+                { 
+                    type: "multi", 
+                    q: "哪些是天然大米会有的颜色？(多选)", 
+                    opts: ["白色", "金色", "黑色", "红色"], 
+                    ans: ["白色", "金色", "黑色", "红色"], 
+                    isMulti: true,
+                    info: "白色是大米最常见的颜色，金色是富含胡萝卜素导致的，红色、黑色是富含花青素导致的。"
+                }, 
+                { isEvent: true }, // 保持这个位置，洪灾、旱灾会在这里随机出现
+                { 
+                    type: "single", 
+                    q: "哪个地区不是稻的主产区？", 
+                    opts: ["东北", "华南", "西南", "青藏"], 
+                    ans: "青藏", 
+                    info: "青藏地区种植水稻较少，主要作物为青稞。" 
+                } 
+            ] 
+        },
+        { 
+            stageName: "🌾 成熟期", 
+            img: "mature.png", 
+            questions: [ 
+                { 
+                    type: "single", 
+                    q: "大米不可以做成哪种食物？", 
+                    opts: ["米皮", "米粉", "米线", "米仁"], 
+                    ans: "米仁", 
+                    info: "米仁一般指薏米仁（薏苡仁），不属于大米制品；而米皮、米粉、米线都是大米制作的产品。" 
+                } 
+            ] 
+        }
     ];
 
     const events = [
         { name: "洪涝", q: "🚨 突发洪水！<br>最关键救灾措施是？", opts: ["加固田埂", "立即排水", "喷洒肥料", "增加光照"], ans: "立即排水", color: "rgba(121, 134, 203, 0.6)" },
-        { name: "旱灾", q: "☀️ 持续高温！<br>应采取什么应急措施？", opts: ["覆盖遮阳", "喷洒农药", "引水灌溉", "立即收割"], ans: "引水灌溉", color: "rgba(255, 152, 0, 0.4)" },
+        { name: "旱灾", q: "☀️ 土地裂开！<br>应采取什么应急措施？", opts: ["覆盖遮阳", "喷洒农药", "引水灌溉", "立即收割"], ans: "引水灌溉", color: "rgba(255, 152, 0, 0.4)" },
         { name: "虫害", q: "🐛 发现大量稻飞虱！<br>应优先采取哪种手段？", opts: ["生物防治", "焚烧秸秆", "排干水分", "增加间距"], ans: "生物防治", color: "rgba(76, 175, 80, 0.4)" }
     ];
 
     function updateMoneyUI() { document.getElementById('money-count').innerText = userMoney; }
 
     function renderQuestion() {
+        document.getElementById('timer-ui').style.display = 'none'; 
+        document.getElementById('explanation').style.display = 'none';
         isProcessing = false; const stage = gameData[currentStageIdx]; let qData = stage.questions[currentQIdx];
         if (qData.isEvent && !qData.q) { qData = { ...events[Math.floor(Math.random() * events.length)], type: "event" }; stage.questions[currentQIdx] = qData; }
         document.getElementById('explanation').style.display = 'none'; document.getElementById('status-tag').innerText = stage.stageName;
@@ -316,14 +552,126 @@
 
     function handleChoice(opt, btn, qData) {
         if (isProcessing) return;
-        if (qData.isMulti) { if (selectedMulti.includes(opt)) { selectedMulti = selectedMulti.filter(o => o !== opt); btn.classList.remove('correct'); } else { selectedMulti.push(opt); btn.classList.add('correct'); } }
-        else if (qData.type === 'event') { isProcessing = true; if (opt === qData.ans) onEventResult(true, btn, "✅ 拯救成功！"); else onEventResult(false, btn, "❌ 拯救失败，退回重新开始！"); }
-        else { if (opt === qData.ans) onCorrect(btn, qData); else { btn.classList.add('wrong'); setTimeout(() => btn.classList.remove('wrong'), 500); } }
+        
+        if (qData.isMulti) { 
+            // 多选题逻辑（保持不变）
+            if (selectedMulti.includes(opt)) { 
+                selectedMulti = selectedMulti.filter(o => o !== opt); 
+                btn.classList.remove('correct'); 
+            } else { 
+                selectedMulti.push(opt); 
+                btn.classList.add('correct'); 
+            } 
+        }
+        else if (qData.type === 'event') { 
+            isProcessing = true; 
+            if (opt === qData.ans) {
+                onEventResult(true, btn, "✅ 拯救成功！");
+            } else { 
+                // --- 修改 1: 灾害事件选错时，也要增加错误计数 ---
+                wrongCount++; 
+                onEventResult(false, btn, "❌ 拯救失败，退回重新开始！");
+            } 
+        }
+        else { 
+            if (opt === qData.ans) {
+                onCorrect(btn, qData);
+            } else { 
+                wrongCount++; 
+                comboCount = 0; // <--- 关键：选错单选题，连击中断
+                
+                btn.classList.add('wrong'); 
+                setTimeout(() => btn.classList.remove('wrong'), 500); 
+            } 
+        }
     }
 
-    function checkMulti(qData) { if (qData.ans.length === selectedMulti.length && qData.ans.every(v => selectedMulti.includes(v))) onCorrect(null, qData); else { showModal('选错了或不完整！'); renderQuestion(); } }
-    function onEventResult(isSuccess, btn, msg) { clearInterval(timerInterval); const expBox = document.getElementById('explanation'); expBox.innerHTML = `<strong>${msg}</strong>`; expBox.style.display = 'block'; if (isSuccess) { if(btn) btn.classList.add('correct'); currentQIdx++; updateProgressBar(); setTimeout(renderQuestion, 2000); } else { if(btn) btn.classList.add('wrong'); document.getElementById('quiz-card').classList.add('fail-shake'); setTimeout(() => { document.getElementById('quiz-card').classList.remove('fail-shake'); currentQIdx = 0; updateProgressBar(); renderQuestion(); }, 2000); } }
-    function onCorrect(btn, qData) { if (btn) btn.classList.add('correct'); triggerGrowEffect(); if (qData.info) { const expBox = document.getElementById('explanation'); expBox.innerText = "✨ " + qData.info; expBox.style.display = 'block'; } currentQIdx++; updateProgressBar(); setTimeout(() => { if (currentQIdx >= gameData[currentStageIdx].questions.length) nextStage(); else renderQuestion(); }, qData.info ? 1800 : 800); }
+    function checkMulti(qData) { 
+        if (qData.ans.length === selectedMulti.length && qData.ans.every(v => selectedMulti.includes(v))) {
+            // 答对后立刻清空选择，防止干扰下一题
+            selectedMulti = []; 
+            onCorrect(null, qData);
+        } else { 
+            wrongCount++; 
+            comboCount = 0; 
+            // 答错也要清空，让玩家重新选
+            selectedMulti = []; 
+            showModal('选错了或不完整！'); 
+            renderQuestion(); 
+        } 
+    }
+
+    function onEventResult(isSuccess, btn, msg) { 
+        // 1. 立刻停止计时器，防止它再次触发
+        clearInterval(timerInterval); 
+        
+        const expBox = document.getElementById('explanation'); 
+        expBox.innerHTML = `<strong>${msg}</strong>`; 
+        expBox.style.display = 'block'; 
+        
+        if (isSuccess) { 
+            // 成功逻辑保持不变...
+            if(btn) btn.classList.add('correct'); 
+            comboCount++; 
+            if (comboCount >= 3) showComboEffect(comboCount);
+            currentQIdx++; 
+            updateProgressBar(); 
+            setTimeout(renderQuestion, 2000); 
+        } else { 
+            // --- 核心修复：失败处理 ---
+            if(btn) btn.classList.add('wrong'); 
+            wrongCount++; 
+            comboCount = 0; 
+
+            // 增加防抖处理：添加一个标志位防止重复弹窗（可选）
+            // 确保进度条动画停止
+            const bar = document.getElementById('timer-bar');
+            if(bar) bar.style.animation = 'none';
+
+            document.getElementById('quiz-card').classList.add('fail-shake'); 
+            
+            setTimeout(() => { 
+                document.getElementById('quiz-card').classList.remove('fail-shake'); 
+                
+                // 关键点：回到本阶段的第一题
+                currentQIdx = 0; 
+                updateProgressBar(); 
+                
+                // 重新渲染题目，这会自动切换回普通题界面并隐藏倒计时 UI
+                renderQuestion(); 
+            }, 2000); 
+        } 
+    }
+
+    function onCorrect(btn, qData) {
+        // 1. 连击计数立刻增加
+        comboCount++; 
+        if (comboCount >= 3) {
+            showComboEffect(comboCount);
+        }
+
+        // 2. 视觉反馈
+        if (btn) btn.classList.add('correct');
+        triggerGrowEffect();
+        
+        // 3. 显示解析
+        if (qData.info) {
+            const expBox = document.getElementById('explanation');
+            expBox.innerText = "✨ " + qData.info;
+            expBox.style.display = 'block';
+        }
+
+        // 4. 进度更新
+        currentQIdx++;
+        updateProgressBar();
+
+        // 5. 切换下一题
+        setTimeout(() => {
+            if (currentQIdx >= gameData[currentStageIdx].questions.length) nextStage();
+            else renderQuestion();
+        }, qData.info ? 1800 : 800);
+    }
+
     function triggerGrowEffect() { const img = document.getElementById('crop-image'); img.classList.remove('grow-boost'); void img.offsetWidth; img.classList.add('grow-boost'); }
     function updateProgressBar() { const totalStages = gameData.length; const progress = ((currentStageIdx / totalStages) + (currentQIdx / gameData[currentStageIdx].questions.length / totalStages)) * 100; document.getElementById('growth-fill').style.width = Math.min(progress, 100) + "%"; }
     function nextStage() { currentStageIdx++; currentQIdx = 0; if (currentStageIdx < gameData.length) renderQuestion(); else showHarvestScreen(); }
@@ -332,22 +680,167 @@
         document.getElementById('status-tag').innerText = "🎊 已成熟";
         document.getElementById('q-text').innerText = `${currentCrop}已丰收！快收割卖给米博士吧！`;
         const optContainer = document.getElementById('q-options');
-        optContainer.innerHTML = '<button class="option-btn sell-btn" onclick="harvest()">收割并卖出 (+250 芽币)</button>';
+        optContainer.innerHTML = '<button class="option-btn sell-btn" onclick="harvest()">收割并卖出</button>';
         document.getElementById('growth-fill').style.width = "100%";
     }
     
     function harvest() {
-        userMoney += 250; isFirstOrder = false;
-        // 解锁图鉴
+        let quality = "";
+        let bonus = 0;
+        let icon = "";
+        let evaluation = "";
+
+        // 1. 判定品质与称号
+        if (wrongCount === 0) {
+            quality = "✨ 特级大米";
+            bonus = 400;
+            icon = "🏆";
+            evaluation = "农学天才";
+        } else if (wrongCount <= 2) {
+            quality = "🌾 标准大米";
+            bonus = 250;
+            icon = "🌾";
+            evaluation = "勤奋耕耘者";
+        } else {
+            quality = "🍂 碎米";
+            bonus = 150;
+            icon = "🥣";
+            evaluation = "农场新人";
+        }
+
+        userMoney += bonus;
+
+        // 2. 米博士👩‍🔬的随机补贴逻辑 (1-100)
+        let luckyMsg = "";
+        let luckyBonus = 0;
+        if (Math.random() < 0.3) {
+            luckyBonus = Math.floor(Math.random() * 100) + 1;
+            userMoney += luckyBonus;
+            luckyMsg = `
+                <div style="margin: 20px 0; padding: 12px; background: #fff9c4; border-radius: 15px; border: 2px dashed #fbc02d; text-align: center;">
+                    <p style="color: #f57f17; font-size: 14px; margin: 0;">👩‍🔬 <b>米博士的特别补贴：</b></p>
+                    <p style="color: #f57f17; font-size: 16px; font-weight: bold; margin: 5px 0 0 0;">额外奖励 +${luckyBonus} 芽币！</p>
+                </div>
+            `;
+        }
+
+        // 3. 更新游戏状态
+        isFirstOrder = false;
         if (collectionData[currentCrop]) collectionData[currentCrop].unlocked = true;
-        
         updateMoneyUI();
-        showModal(`收割成功！获得了 250 芽币。<br>【${currentCrop}】已记录在农场手记中！`);
-        document.getElementById('crop-image').classList.remove('loaded');
-        setTimeout(() => { document.getElementById('game-main').style.display = 'none'; document.getElementById('farm-preview').style.display = 'flex'; }, 500);
+
+        // 4. 隐藏底部默认按钮，准备显示自定义分享卡片
+        const originalBtn = document.querySelector('.modal-btn');
+        if (originalBtn) originalBtn.style.display = 'none';
+
+        // 5. 弹出精美的分享成就卡
+        showModal(`
+            <div id="share-card" style="padding: 10px; text-align: center;">
+                <p style="color: #a1887f; font-size: 12px; margin-bottom: 10px; letter-spacing: 2px;">KNOWLEDGE FARM HONOR</p>
+                
+                <div style="font-size: 50px; margin-bottom: 10px;">${icon}</div>
+                <h3 style="color: #4caf50; margin: 0 0 15px 0; font-size: 26px;">${quality}</h3>
+                
+                <div style="background: #fdfbf5; padding: 15px; border-radius: 18px; border: 2px solid #ffe082; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;">
+                    <p style="margin: 0; font-size: 14px; color: #9e9e9e;">获得评价</p>
+                    <p style="margin: 0; font-size: 14px; color: #8d6e63; font-weight: bold; text-align: right;">${evaluation}</p>
+                    
+                    <p style="margin: 0; font-size: 14px; color: #9e9e9e;">本次失误</p>
+                    <p style="margin: 0; font-size: 14px; color: #ff8a65; font-weight: bold; text-align: right;">${wrongCount} 次</p>
+                    
+                    <p style="margin: 0; font-size: 14px; color: #9e9e9e;">总计收入</p>
+                    <p style="margin: 0; font-size: 14px; color: #f57f17; font-weight: bold; text-align: right;">${bonus + luckyBonus} 芽币</p>
+                </div>
+
+                ${luckyMsg}
+
+                <p style="font-size: 12px; color: #bdbdbd; margin-bottom: 15px;">📸 截图保存你的农场经营成就</p>
+                
+                <button onclick="safeOpen()" style="width: 100%; background: #81c784; color: white; border: none; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 6px 20px rgba(129,199,132,0.4); margin-bottom: 12px;">
+                    📋 填写调研问卷
+                </button>
+
+                <button onclick="location.reload()" style="width: 100%; background: transparent; color: #a1887f; border: 2px solid #e0e0e0; padding: 12px; border-radius: 30px; font-weight: bold; font-size: 14px; cursor: pointer;">
+                    再种一季
+                </button>
+            </div>
+        `);
+
+        // 重置题目进度
+        currentQIdx = 0;
     }
 
-    function startEventTimer() { timeLeft = 7; const bar = document.getElementById('timer-bar'); bar.style.transition = "none"; bar.style.width = "100%"; setTimeout(() => { bar.style.transition = "width 7s linear"; bar.style.width = "0%"; }, 50); timerInterval = setInterval(() => { timeLeft--; if (timeLeft <= 0) { clearInterval(timerInterval); showModal('⏰ 救援失败！'); onEventResult(false, null, "灾难来袭..."); } }, 1000); }
+    document.getElementById('crop-image').classList.remove('loaded');
+    setTimeout(() => { 
+        document.getElementById('game-main').style.display = 'none'; 
+        document.getElementById('farm-preview').style.display = 'flex'; 
+    }, 500);
+    
+
+    // 显示动森风格的“连胜”效果
+    // 显示动森风格的“连胜”效果 (超神版)
+    function showComboEffect(count) {
+        const container = document.getElementById('quiz-card') || document.querySelector('.phone-container');
+        if (!container) return;
+
+        const comboEl = document.createElement('div');
+        comboEl.className = 'combo-text';
+        
+        // 组合成： [连对] (数字) 的样式
+        comboEl.innerHTML = `
+            <span class="combo-label">连对</span>
+            <div class="combo-number">${count}</div>
+        `;
+
+        container.appendChild(comboEl);
+
+        setTimeout(() => {
+            if (comboEl.parentNode) comboEl.parentNode.removeChild(comboEl);
+        }, 1200);
+    }
+
+    function startEventTimer() { 
+            timeLeft = 7; 
+            const bar = document.getElementById('timer-bar'); 
+            
+            // --- 核心修复：重置进度条动画 ---
+            bar.style.animation = 'none'; // 先关闭动画
+            bar.offsetHeight; // 触发回流（强制浏览器重绘）
+            bar.style.animation = 'timer 7s linear forwards'; // 重新开启 7 秒倒计时动画
+            // -------------------------------
+
+            timerInterval = setInterval(() => { 
+                timeLeft--; 
+                if (timeLeft <= 0) { 
+                    clearInterval(timerInterval); 
+                    wrongCount++;
+                    comboCount = 0; 
+                    showModal('⏰ 救援失败！'); 
+                    onEventResult(false, null, "灾难来袭..."); 
+                } 
+            }, 1000); 
+    }
+
+    function safeOpen() {
+        // 这是 https://v.wjx.cn/vm/QsWmQ71.aspx 的安全编码
+        const b64 = "aHR0cHM6Ly92LndqeC5jbi92bS9Rc1dtUTcxLmFzcHg=";
+        try {
+            const url = atob(b64);
+            console.log("正在尝试打开链接:", url);
+            
+            // 尝试打开新窗口
+            const win = window.open(url, '_blank');
+            
+            // 如果被浏览器拦截（win 为空），则在当前窗口直接跳转
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                console.warn("检测到弹出窗口被拦截，正在当前页面跳转...");
+                window.location.href = url;
+            }
+        } catch (e) {
+            // 如果以上都失败，最后的保底强制跳转
+            window.location.href = "https://v.wjx.cn/vm/QsWmQ71.aspx";
+        }
+    }
 </script>
 </body>
 </html>
